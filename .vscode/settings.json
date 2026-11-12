@@ -1,0 +1,10 @@
+{
+    "java.project.sourcePaths": [
+        "chat-app/src"
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        ".idea/libraries/**/*.jar"
+    ]
+}
+

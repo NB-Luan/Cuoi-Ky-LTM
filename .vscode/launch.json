@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Server (ChatServer)",
+            "request": "launch",
+            "mainClass": "server.ChatServer"
+        },
+        {
+            "type": "java",
+            "name": "Run Client (LoginFrame)",
+            "request": "launch",
+            "mainClass": "client.LoginFrame"
+        }
+    ]
+}
+
