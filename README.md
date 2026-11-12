@@ -121,3 +121,4 @@ Giao diện ứng dụng được thiết kế hiện đại bằng **Java Swing
 - Mở thư mục dự án trong IntelliJ IDEA.
 - Chuột phải vào `ChatServer.java` ➔ Chọn **Run 'ChatServer.main()'**.
 - Chuột phải vào `LoginFrame.java` ➔ Chọn **Run 'LoginFrame.main()'**.
+

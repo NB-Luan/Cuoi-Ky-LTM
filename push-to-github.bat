@@ -10,7 +10,7 @@ echo ========================================================
 echo Dang day code len: https://github.com/NB-Luan/LTM-TCP-Chat-App.git
 echo.
 
-git push -u origin main
+git push origin main
 
 if %ERRORLEVEL% EQU 0 (
     echo.
@@ -19,9 +19,7 @@ if %ERRORLEVEL% EQU 0 (
     echo ========================================================
 ) else (
     echo.
-    echo [CHUA THANH CONG]
-    echo Neu ban chua tao repo tren web, vui long vao https://github.com/new
-    echo tao repo ten la "LTM-TCP-Chat-App" roi chay lai file nay nhe!
+    echo [LOI] Co loi xay ra khi day code len GitHub.
 )
 
 echo.
