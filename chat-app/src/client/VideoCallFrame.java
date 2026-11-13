@@ -26,9 +26,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Cửa sổ cuộc gọi video 1-1.
  *
- * - Hình ảnh: webcam (nếu có thư viện) hoặc chia sẻ màn hình, chụp + nén + gửi trên thread riêng (không làm đơ giao diện).
- * - Âm thanh: micro/loa qua javax.sound.sampled (có sẵn trong JDK), PCM 16kHz mono, gói 100ms.
- * - Tự kết thúc khi: không ai nghe máy sau 30s, hoặc không nhận được gì từ đối phương quá 10s.
+ * - Hình ảnh: webcam (nếu có thư viện) hoặc chia sẻ màn hình, chụp + nén + gửi
+ * trên thread riêng (không làm đơ giao diện).
+ * - Âm thanh: micro/loa qua javax.sound.sampled (có sẵn trong JDK), PCM 16kHz
+ * mono, gói 100ms.
+ * - Tự kết thúc khi: không ai nghe máy sau 30s, hoặc không nhận được gì từ đối
+ * phương quá 10s.
  */
 public class VideoCallFrame extends JFrame {
 
@@ -36,7 +39,7 @@ public class VideoCallFrame extends JFrame {
     private static final Color TILE = new Color(0x1F2338);
 
     private static final AudioFormat AUDIO_FORMAT = new AudioFormat(16000f, 16, 1, true, false);
-    private static final int AUDIO_CHUNK = 3200;          // 100ms
+    private static final int AUDIO_CHUNK = 3200; // 100ms
     private static final int RING_TIMEOUT_MS = 30000;
     private static final int PEER_TIMEOUT_MS = 10000;
     private static final String CAM_OFF = "CAM_OFF";
@@ -112,7 +115,7 @@ public class VideoCallFrame extends JFrame {
         camBtn = new UI.Btn("Tắt camera", UI.glyph("video", 16, Color.WHITE), neutral, neutralHover, Color.WHITE, 22);
         UI.Btn endBtn = new UI.Btn("Kết thúc", UI.glyph("phone", 16, Color.WHITE),
                 UI.DANGER, new Color(0xBE123C), Color.WHITE, 22);
-        for (UI.Btn b : new UI.Btn[]{micBtn, camBtn, endBtn}) {
+        for (UI.Btn b : new UI.Btn[] { micBtn, camBtn, endBtn }) {
             b.setBorder(BorderFactory.createEmptyBorder(11, 20, 11, 20));
         }
         micBtn.addActionListener(e -> toggleMic());
@@ -137,7 +140,8 @@ public class VideoCallFrame extends JFrame {
         });
 
         if (isCaller) {
-            // Không ai nghe máy sau 30s thì tự huỷ (và báo cho bên kia tắt hộp thoại "Cuộc gọi đến")
+            // Không ai nghe máy sau 30s thì tự huỷ (và báo cho bên kia tắt hộp thoại "Cuộc
+            // gọi đến")
             ringTimer = new Timer(RING_TIMEOUT_MS, e -> {
                 if (!active && !closed) {
                     client.send(new Message(Message.Type.VIDEO_CALL_END, me, peer, null));
@@ -155,17 +159,34 @@ public class VideoCallFrame extends JFrame {
         this.onClosed = r;
     }
 
-    /** Bắt đầu gửi hình + tiếng (bên nhận gọi: ngay khi mở cửa sổ; bên gọi: khi nhận VIDEO_CALL_ACCEPT). */
+    /**
+     * Bắt đầu gửi hình + tiếng (bên nhận gọi: ngay khi mở cửa sổ; bên gọi: khi nhận
+     * VIDEO_CALL_ACCEPT).
+     */
     public void startActive() {
-        if (active || closed) return;
+        if (active || closed)
+            return;
         active = true;
         lastRemote = System.currentTimeMillis();
-        if (ringTimer != null) ringTimer.stop();
+        if (ringTimer != null)
+            ringTimer.stop();
         statusLabel.setText("Đang trong cuộc gọi với " + peer);
 
-        startThread(new Runnable() { public void run() { videoLoop(); } }, "call-video");
-        startThread(new Runnable() { public void run() { audioCaptureLoop(); } }, "call-mic");
-        startThread(new Runnable() { public void run() { playbackLoop(); } }, "call-speaker");
+        startThread(new Runnable() {
+            public void run() {
+                videoLoop();
+            }
+        }, "call-video");
+        startThread(new Runnable() {
+            public void run() {
+                audioCaptureLoop();
+            }
+        }, "call-mic");
+        startThread(new Runnable() {
+            public void run() {
+                playbackLoop();
+            }
+        }, "call-speaker");
 
         watchdog = new Timer(2000, e -> {
             if (!closed && System.currentTimeMillis() - lastRemote > PEER_TIMEOUT_MS) {
@@ -182,7 +203,8 @@ public class VideoCallFrame extends JFrame {
         t.start();
     }
 
-    // ------------------------------------------------------------------ gửi hình ảnh
+    // ------------------------------------------------------------------ gửi hình
+    // ảnh
 
     private void videoLoop() {
         final CameraSource src = CameraSource.open();
@@ -191,7 +213,8 @@ public class VideoCallFrame extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 localView.setCaption(caption);
-                if (!closed && note.length() > 0) statusLabel.setText(note);
+                if (!closed && note.length() > 0)
+                    statusLabel.setText(note);
             }
         });
         final long interval = src.isWebcam() ? 125 : 200; // ~8 / ~5 khung hình mỗi giây
@@ -205,14 +228,18 @@ public class VideoCallFrame extends JFrame {
                             BufferedImage small = fit(raw, 400, 300);
                             final BufferedImage preview = src.isWebcam() ? mirror(small) : small;
                             SwingUtilities.invokeLater(new Runnable() {
-                                public void run() { if (camOn) localView.setFrame(preview); }
+                                public void run() {
+                                    if (camOn)
+                                        localView.setFrame(preview);
+                                }
                             });
                             Message m = new Message(Message.Type.VIDEO_FRAME, me, peer, null);
                             m.setFileData(toJpeg(small, 0.6f));
                             client.send(m);
                         }
                     } else {
-                        // Camera tắt: gửi tín hiệu nhỏ mỗi giây để bên kia biết và không tưởng mất kết nối
+                        // Camera tắt: gửi tín hiệu nhỏ mỗi giây để bên kia biết và không tưởng mất kết
+                        // nối
                         client.send(new Message(Message.Type.VIDEO_FRAME, me, peer, CAM_OFF));
                     }
                 } catch (Exception ignored) {
@@ -226,10 +253,14 @@ public class VideoCallFrame extends JFrame {
     }
 
     private void sleepOrWake(long ms) {
-        if (ms <= 0) return;
+        if (ms <= 0)
+            return;
         synchronized (wakeLock) {
             if (!wakeFlag) {
-                try { wakeLock.wait(ms); } catch (InterruptedException ignored) { }
+                try {
+                    wakeLock.wait(ms);
+                } catch (InterruptedException ignored) {
+                }
             }
             wakeFlag = false;
         }
@@ -297,7 +328,8 @@ public class VideoCallFrame extends JFrame {
             byte[] buf = new byte[AUDIO_CHUNK];
             while (active && !closed) {
                 int n = mic.read(buf, 0, buf.length);
-                if (n <= 0 || !micOn) continue; // tắt mic: vẫn đọc để xả bộ đệm nhưng không gửi
+                if (n <= 0 || !micOn)
+                    continue; // tắt mic: vẫn đọc để xả bộ đệm nhưng không gửi
                 Message m = new Message(Message.Type.AUDIO_FRAME, me, peer, null);
                 m.setFileData(Arrays.copyOf(buf, n));
                 client.send(m);
@@ -316,13 +348,15 @@ public class VideoCallFrame extends JFrame {
         SourceDataLine speaker = null;
         try {
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, AUDIO_FORMAT);
-            if (!AudioSystem.isLineSupported(info)) return;
+            if (!AudioSystem.isLineSupported(info))
+                return;
             speaker = (SourceDataLine) AudioSystem.getLine(info);
             speaker.open(AUDIO_FORMAT, AUDIO_CHUNK * 4);
             speaker.start();
             while (active && !closed) {
                 byte[] chunk = playQueue.poll(200, TimeUnit.MILLISECONDS);
-                if (chunk != null) speaker.write(chunk, 0, chunk.length);
+                if (chunk != null)
+                    speaker.write(chunk, 0, chunk.length);
             }
         } catch (InterruptedException ignored) {
         } catch (Exception e) {
@@ -337,11 +371,15 @@ public class VideoCallFrame extends JFrame {
 
     private void postNote(final String text) {
         SwingUtilities.invokeLater(new Runnable() {
-            public void run() { if (!closed) statusLabel.setText(text); }
+            public void run() {
+                if (!closed)
+                    statusLabel.setText(text);
+            }
         });
     }
 
-    // ------------------------------------------------------------------ nút điều khiển
+    // ------------------------------------------------------------------ nút điều
+    // khiển
 
     private void toggleMic() {
         micOn = !micOn;
@@ -358,10 +396,12 @@ public class VideoCallFrame extends JFrame {
         wakeVideoThread(); // gửi trạng thái mới ngay, không chờ hết chu kỳ ngủ
     }
 
-    // ------------------------------------------------------------------ nhận từ đối phương (gọi trên EDT)
+    // ------------------------------------------------------------------ nhận từ
+    // đối phương (gọi trên EDT)
 
     public void onRemoteFrame(Message m) {
-        if (closed) return;
+        if (closed)
+            return;
         lastRemote = System.currentTimeMillis();
         if (CAM_OFF.equals(m.getContent()) || m.getFileData() == null) {
             remoteView.setPlaceholder(peer + " đã tắt camera");
@@ -370,15 +410,18 @@ public class VideoCallFrame extends JFrame {
         }
         try {
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(m.getFileData()));
-            if (img != null) remoteView.setFrame(img);
+            if (img != null)
+                remoteView.setFrame(img);
         } catch (IOException ignored) {
         }
     }
 
     public void onRemoteAudio(byte[] pcm) {
-        if (closed) return;
+        if (closed)
+            return;
         lastRemote = System.currentTimeMillis();
-        if (pcm == null || !active) return;
+        if (pcm == null || !active)
+            return;
         if (!playQueue.offer(pcm)) { // đầy: bỏ gói cũ nhất để không bị trễ tiếng dần
             playQueue.poll();
             playQueue.offer(pcm);
@@ -386,7 +429,8 @@ public class VideoCallFrame extends JFrame {
     }
 
     public void onRemoteEnded(String reason) {
-        if (closed) return;
+        if (closed)
+            return;
         statusLabel.setText(reason);
         micBtn.setEnabled(false);
         camBtn.setEnabled(false);
@@ -397,7 +441,8 @@ public class VideoCallFrame extends JFrame {
     }
 
     private void hangUp(boolean notifyPeer) {
-        if (closed) return;
+        if (closed)
+            return;
         if (notifyPeer) {
             client.send(new Message(Message.Type.VIDEO_CALL_END, me, peer, null));
         }
@@ -406,8 +451,10 @@ public class VideoCallFrame extends JFrame {
 
     private void stopMedia() {
         active = false;
-        if (ringTimer != null) ringTimer.stop();
-        if (watchdog != null) watchdog.stop();
+        if (ringTimer != null)
+            ringTimer.stop();
+        if (watchdog != null)
+            watchdog.stop();
         playQueue.clear();
         wakeVideoThread(); // các thread tự thoát và tự đóng camera / micro / loa
     }
