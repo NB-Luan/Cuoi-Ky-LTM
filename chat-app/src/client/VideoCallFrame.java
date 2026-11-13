@@ -44,7 +44,6 @@ public class VideoCallFrame extends JFrame {
     private final ChatClient client;
     private final String peer;
     private final String me;
-    private final boolean isCaller;
 
     private final VideoTile localView = new VideoTile("Bạn");
     private final VideoTile remoteView = new VideoTile(null);
@@ -71,8 +70,6 @@ public class VideoCallFrame extends JFrame {
         this.client = client;
         this.peer = peer;
         this.me = client.getUsername();
-        this.isCaller = isCaller;
-
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLayout(new BorderLayout());
         getContentPane().setBackground(BG);

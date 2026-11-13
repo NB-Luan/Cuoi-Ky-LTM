@@ -428,10 +428,6 @@ public class MainFrame extends JFrame {
     }
 
 
-    private void appendText(String target, boolean isGroup, String sender, String text) {
-        appendText(target, isGroup, sender, text, null);
-    }
-
     private void appendText(String target, boolean isGroup, String sender, String text, String messageId) {
         boolean mine = "Me".equals(sender);
         String shown = mine ? client.getUsername() : sender;
@@ -440,10 +436,6 @@ public class MainFrame extends JFrame {
 
     private void appendSystem(String target, boolean isGroup, String text) {
         paneFor(target, isGroup).addSystem(text);
-    }
-
-    private void appendImage(String target, boolean isGroup, String sender, ImageIcon icon, String caption) {
-        appendImage(target, isGroup, sender, icon, caption, null);
     }
 
     private void appendImage(String target, boolean isGroup, String sender, ImageIcon icon,
